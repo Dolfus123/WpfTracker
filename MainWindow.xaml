@@ -1,0 +1,107 @@
+﻿<Window x:Class="WpfTracker.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfTracker"
+        xmlns:charting="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=DotNetProjects.DataVisualization.Toolkit"
+        mc:Ignorable="d"
+        Title="Tracker" Height="600" Width="1250">
+
+    <Window.Resources>
+        <Style TargetType="TextBlock" >
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Foreground" Value="LightSkyBlue"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect ShadowDepth="2" BlurRadius="2"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1.2*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25" />
+            <RowDefinition Height="25" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Menu Grid.ColumnSpan="2" >
+            <MenuItem Header="Файл">
+                <MenuItem Header="Добавить данные по новым дням" Command="{Binding OpenCommand}" />
+                <MenuItem Header="Сохранить данные по выбранному пользователю" Command="{Binding SaveCommand}" />
+            </MenuItem>
+        </Menu>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Список пользователей" />
+
+        <DataGrid Grid.Row="2" Margin="20" ItemsSource="{Binding Users}" 
+                  AutoGenerateColumns="False"
+                  SelectedItem="{Binding SelectedUser}"
+                  CanUserAddRows="False"
+                  IsReadOnly="True"
+                  RowHeaderWidth="0">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ФИО" Width="*" Binding="{Binding Path=Name}"/>
+                <DataGridTextColumn Header="Среднее количество шагов" Width="1.1*" Binding="{Binding Path=AverageSteps}"/>
+                <DataGridTextColumn Header="Лучший результат, шагов" Width="*" Binding="{Binding Path=MaxSteps}"/>
+                <DataGridTextColumn Header="Худший результат, шагов" Width="*" Binding="{Binding Path=MinSteps}"/>
+            </DataGrid.Columns>
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=IsUnstable}" Value="true">
+                            <Setter Property="Background" Value="LightSkyBlue"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=IsUnstable}" Value="false">
+                            <Setter Property="Background" Value="AliceBlue"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+        </DataGrid>
+
+        <TextBlock Grid.Row="1" Grid.Column="1" Text="График по выбранному пользователю"/>
+
+        <charting:Chart  Grid.Row="2" Grid.Column="2"
+                        Margin="20,20" 
+                        Title="{Binding SelectedUser.Name}">
+            <charting:Chart.Axes>
+                <charting:CategoryAxis Orientation="X" Title="Дни" />
+                <charting:CategoryAxis Orientation="Y" Title="Шаги" />
+            </charting:Chart.Axes>
+
+            <charting:Chart.LegendStyle>
+                <Style TargetType="Control">
+                    <Setter Property="Width" Value="0" />
+                    <Setter Property="Height" Value="0" />
+                </Style>
+            </charting:Chart.LegendStyle>
+            <charting:Chart.Series>
+                <charting:ColumnSeries 
+                    ItemsSource="{Binding SelectedUser.Days}"
+                    DependentValuePath="Steps">
+                    <charting:ColumnSeries.DataPointStyle >
+                        <Style TargetType="charting:ColumnDataPoint">
+                            <Setter Property="Background" Value="DimGray"/>
+                            <Style.Triggers>
+                                 <DataTrigger Binding="{Binding IsMaxSteps}" Value="True">
+                                    <Setter Property="Background" Value="LightSeaGreen" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsMinSteps}" Value="True">
+                                    <Setter Property="Background" Value="LightCoral" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </charting:ColumnSeries.DataPointStyle>
+                </charting:ColumnSeries>
+            </charting:Chart.Series>
+        </charting:Chart>
+    </Grid>
+</Window>
